@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather & News Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Custom CSS styles */
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Weather & News Dashboard</h1>
+    <div class="form-group">
+      <label for="locationInput">Enter Location:</label>
+      <input type="text" id="locationInput" class="form-control" placeholder="Enter city or ZIP code">
+    </div>
+    <button id="getDataBtn" class="btn btn-primary">Get Weather & News</button>
+    <div id="weatherInfo" class="mt-4"></div>
+    <div id="newsHeadlines" class="mt-4"></div>
+  </div>
+
+  <script>
+    // Function to fetch weather data from OpenWeatherMap API
+    function fetchWeatherData(location) {
+      const apiKey = 'ebf52f5e2a54ca1daa14a95cbd9b661a';
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}`;
+
+      fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch weather data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Weather API response:', data);
+            // Update UI with weather information
+            const weatherInfoDiv = document.getElementById('weatherInfo');
+            weatherInfoDiv.innerHTML = `
+                <h2>Weather Information for ${location}</h2>
+                <p>Temperature: ${data.main.temp} K</p>
+                <p>Humidity: ${data.main.humidity} %</p>
+                <p>Wind Speed: ${data.wind.speed} m/s</p>
+            `;
+        })
+        .catch(error => console.error('Error fetching weather data:', error));
+}
+
+    // Function to fetch news headlines from NewsAPI
+    function fetchNewsHeadlines(location) {
+        const apiKey = 'c4e4c9eb5dac436b87a010b2fade31e7';
+        const apiUrl = `https://newsapi.org/v2/top-headlines?q=${location}&apiKey=${apiKey}`;
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch news headlines');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('News API response:', data);
+                // Update UI with news headlines
+                const newsHeadlinesDiv = document.getElementById('newsHeadlines');
+                newsHeadlinesDiv.innerHTML = `
+                    <h2>Top News Headlines for ${location}</h2>
+                `;
+            const articles = data.articles;
+            articles.forEach(article => {
+                const articleElement = document.createElement('div');
+                articleElement.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <p>${article.description}</p>
+                    <a href="${article.url}" target="_blank">Read more</a>
+                    <hr>
+                    `;
+                newsHeadlinesDiv.appendChild(articleElement);
+            });
+        })
+        .catch(error => console.error('Error fetching news headlines:', error));
+}
+
+    // Event listener for Get Weather & News button
+    document.getElementById('getDataBtn').addEventListener('click', function() {
+      const location = document.getElementById('locationInput').value.trim();
+      if (location !== '') {
+        fetchWeatherData(location);
+        fetchNewsHeadlines(location);
+      } else {
+        alert('Please enter a location.');
+      }
+    });
+  </script>
+</body>
+</html>
