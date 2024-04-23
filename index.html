@@ -14,7 +14,7 @@
     <h1 class="text-center mb-4">Weather & News Dashboard</h1>
     <div class="form-group">
       <label for="locationInput">Enter Location:</label>
-      <input type="text" id="locationInput" class="form-control" placeholder="Enter city or ZIP code">
+      <input type="text" id="locationInput" class="form-control" placeholder="Enter city. Please put a comma between the city name and state.">
     </div>
     <button id="getDataBtn" class="btn btn-primary">Get Weather & News</button>
     <div id="weatherInfo" class="mt-4"></div>
@@ -38,6 +38,7 @@
             console.log('Weather API response:', data);
             // Update UI with weather information
             const weatherInfoDiv = document.getElementById('weatherInfo');
+            //let farenheight = ((((data.main.temp-273.13)*9)/5)+32);
             weatherInfoDiv.innerHTML = `
                 <h2>Weather Information for ${location}</h2>
                 <p>Temperature: ${data.main.temp} K</p>
@@ -51,7 +52,8 @@
     // Function to fetch news headlines from NewsAPI
     function fetchNewsHeadlines(location) {
         const apiKey = 'c4e4c9eb5dac436b87a010b2fade31e7';
-        const apiUrl = `https://newsapi.org/v2/top-headlines?q=${location}&apiKey=${apiKey}`;
+        //const apiUrl = `https://newsapi.org/v2/top-headlines?q=${location}&apiKey=${apiKey}`;
+        const apiUrl = `https://newsapi.org/v2/everything?q=${location}&sortBy=popularity&apiKey=${apiKey}`;
 
         fetch(apiUrl)
             .then(response => {
@@ -67,20 +69,28 @@
                 newsHeadlinesDiv.innerHTML = `
                     <h2>Top News Headlines for ${location}</h2>
                 `;
-            const articles = data.articles;
-            articles.forEach(article => {
-                const articleElement = document.createElement('div');
-                articleElement.innerHTML = `
-                    <h3>${article.title}</h3>
-                    <p>${article.description}</p>
-                    <a href="${article.url}" target="_blank">Read more</a>
-                    <hr>
-                    `;
-                newsHeadlinesDiv.appendChild(articleElement);
+                const articles = data.articles;
+                if (articles.length === 0) {
+                    newsHeadlinesDiv.innerHTML += '<p>No news articles found.</p>';
+                } else {
+                    articles.forEach(article => {
+                        const articleElement = document.createElement('div');
+                        articleElement.innerHTML = `
+                            <h3>${article.title}</h3>
+                            <p>${article.description}</p>
+                            <a href="${article.url}" target="_blank">Read more</a>
+                            <hr>
+                        `;
+                        newsHeadlinesDiv.appendChild(articleElement);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching news headlines:', error);
+                const newsHeadlinesDiv = document.getElementById('newsHeadlines');
+                newsHeadlinesDiv.innerHTML = '<p>Failed to fetch news headlines. Please try again later.</p>';
             });
-        })
-        .catch(error => console.error('Error fetching news headlines:', error));
-}
+    }
 
     // Event listener for Get Weather & News button
     document.getElementById('getDataBtn').addEventListener('click', function() {
